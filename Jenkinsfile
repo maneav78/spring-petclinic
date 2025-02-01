@@ -80,7 +80,7 @@ pipeline {
                 script {
                     sh """
                     docker build -t ${IMAGE_NAME}:${GIT_COMMIT} .
-                    docker tag ${IMAGE_NAME}:${GIT_COMMIT} localhost:8084/repository/${REPO_MAIN}/${IMAGE_NAME}:${GIT_COMMIT}
+                    docker tag ${IMAGE_NAME}:${GIT_COMMIT} localhost:8085/repository/${REPO_MAIN}/${IMAGE_NAME}:${GIT_COMMIT}
                     docker push localhost:8085/repository/${REPO_MAIN}/${IMAGE_NAME}:${GIT_COMMIT}
                     """
                 }
