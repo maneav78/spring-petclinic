@@ -72,7 +72,7 @@ pipeline {
 
         stage ('Docker Image for main branch') {
             when {
-                expression { env.BRANCH_NAME == 'main' }
+                expression { env.BRANCH_NAME == 'origin/main' }
             }
             steps {
                 script {
