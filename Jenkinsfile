@@ -43,6 +43,15 @@ pipeline {
             }
         }
 
+        stage ('Debug Branch Name') {
+            steps {
+                script {
+                    sh 'echo "Current branch: $GIT_BRANCH"'
+                    sh 'echo "BRANCH_NAME: $BRANCH_NAME"'
+                }
+            }
+        }
+
         stage ('Docker Image for MR') {
             when {
                 branch 'PR-*'
