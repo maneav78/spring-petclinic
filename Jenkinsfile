@@ -72,14 +72,16 @@ pipeline {
 
         stage ('Docker Image for main branch') {
             when {
-                expression { env.BRANCH_NAME == 'origin/main' }
+                expression {
+                    env.BRANCH_NAME == 'origin/main' || env.GIT_BRANCH?.contains('main')
+                }
             }
             steps {
                 script {
                     sh """
                     docker build -t ${IMAGE_NAME}:${GIT_COMMIT} .
                     docker tag ${IMAGE_NAME}:${GIT_COMMIT} localhost:8084/repository/${REPO_MAIN}/${IMAGE_NAME}:${GIT_COMMIT}
-                    docker push localhost:8084/repository/${REPO_MR}/${IMAGE_NAME}:${GIT_COMMIT}
+                    docker push localhost:8085/repository/${REPO_MR}/${IMAGE_NAME}:${GIT_COMMIT}
                     """
                 }
             }
