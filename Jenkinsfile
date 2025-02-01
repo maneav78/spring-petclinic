@@ -9,12 +9,18 @@ pipeline {
 
     stages {
         stage ('Checkout') {
+            when {
+                expression { env.CHANGE_ID != null } 
+            }
             steps {
                 checkout scm 
             }
         }
 
         stage ('Checkstyle') {
+            when {
+                expression { env.CHANGE_ID != null } 
+            }
             steps {
                 script {
                     sh 'mvn checkstyle:checkstyle'
@@ -28,6 +34,9 @@ pipeline {
         }
 
         stage ('Test') {
+            when {
+                expression { env.CHANGE_ID != null } 
+            }
             steps {
                 script {
                     sh 'mvn test'
@@ -36,6 +45,9 @@ pipeline {
         }
 
         stage ('Build') {
+            when {
+                expression { env.CHANGE_ID != null } 
+            }
             steps {
                 script {
                     sh 'mvn clean install -DskipTests'
@@ -43,18 +55,9 @@ pipeline {
             }
         }
 
-        stage ('Debug Branch Name') {
-            steps {
-                script {
-                    sh 'echo "Current branch: $GIT_BRANCH"'
-                    sh 'echo "BRANCH_NAME: $BRANCH_NAME"'
-                }
-            }
-        }
-
         stage ('Docker Image for MR') {
             when {
-                branch 'PR-*'
+                expression { env.CHANGE_ID != null } 
             }
             steps {
                 script {
@@ -69,7 +72,7 @@ pipeline {
 
         stage ('Docker Image for main branch') {
             when {
-                branch 'main'
+                expression { env.BRANCH_NAME == 'main' }
             }
             steps {
                 script {
