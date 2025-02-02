@@ -10,16 +10,16 @@ pipeline {
     stages {
         stage ('Checkout') {
             when {
-                expression { env.CHANGE_ID != null } 
+                expression { env.CHANGE_ID != null }
             }
             steps {
-                checkout scm 
+                checkout scm
             }
         }
 
         stage ('Checkstyle') {
             when {
-                expression { env.CHANGE_ID != null } 
+                expression { env.CHANGE_ID != null }
             }
             steps {
                 script {
@@ -35,7 +35,7 @@ pipeline {
 
         stage ('Test') {
             when {
-                expression { env.CHANGE_ID != null } 
+                expression { env.CHANGE_ID != null }
             }
             steps {
                 script {
@@ -46,7 +46,7 @@ pipeline {
 
         stage ('Build') {
             when {
-                expression { env.CHANGE_ID != null } 
+                expression { env.CHANGE_ID != null }
             }
             steps {
                 script {
@@ -57,16 +57,22 @@ pipeline {
 
         stage ('Docker Image for MR') {
             when {
-                expression { env.CHANGE_ID != null } 
+                expression { env.CHANGE_ID != null }
             }
             steps {
                 script {
-                    sh """
-                    docker login -u admin -p localhost:8084
-                    docker build -t ${IMAGE_NAME}:${GIT_COMMIT} .
-                    docker tag ${IMAGE_NAME}:${GIT_COMMIT} localhost:8084/repository/${REPO_MR}/${IMAGE_NAME}:${GIT_COMMIT}
-                    docker push localhost:8084/repository/${REPO_MR}/${IMAGE_NAME}:${GIT_COMMIT}
-                    """
+                    withCredentials([usernamePassword(
+                        credentialsId: 'docker-credentials',
+                        usernameVariable: 'DOCKER_CREDS_USR',
+                        passwordVariable: 'DOCKER_CREDS_PSW'
+                    )]) {
+                        sh """
+                        echo "${DOCKER_CREDS_PSW}" | docker login localhost:8084 -u "${DOCKER_CREDS_USR}" --password-stdin
+                        docker build -t ${IMAGE_NAME}:${GIT_COMMIT} .
+                        docker tag ${IMAGE_NAME}:${GIT_COMMIT} localhost:8084/repository/${REPO_MR}/${IMAGE_NAME}:${GIT_COMMIT}
+                        docker push localhost:8084/repository/${REPO_MR}/${IMAGE_NAME}:${GIT_COMMIT}
+                        """
+                    }
                 }
             }
         }
@@ -80,7 +86,7 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(
-                        credentialsId: 'docker-credentials', 
+                        credentialsId: 'docker-credentials',
                         usernameVariable: 'DOCKER_CREDS_USR',
                         passwordVariable: 'DOCKER_CREDS_PSW'
                     )]) {
@@ -91,6 +97,7 @@ pipeline {
                         docker push localhost:8085/repository/${REPO_MAIN}/${IMAGE_NAME}:${GIT_COMMIT}
                         """
                     }
+                }
             }
         }
     }
